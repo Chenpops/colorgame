@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เกมหาสีประจำตัว</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ink:#1E2230; --ink-2:#5B6072; --line:#E2E4EB; --surface:#FFFFFF; --soft:#F5F6F9;
+  --pink:#E2558F; --blue:#3A86C8; --yellow:#E9B91E; --green:#3E8E3A;
+  --pink-t:#FCE6EF; --blue-t:#E2EEF9; --yellow-t:#FDF3D3; --green-t:#E3F1E1;
+  --aura:#C7CBD6;
+  --display:"Mitr","Noto Sans Thai",system-ui,sans-serif;
+  --body:"IBM Plex Sans Thai","Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--surface);color:var(--ink);min-height:100%}
+body{font-family:var(--body);font-size:15px;line-height:1.55;padding:env(safe-area-inset-top,0) max(0px,env(safe-area-inset-right,0)) env(safe-area-inset-bottom,0) max(0px,env(safe-area-inset-left,0))}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+[hidden]{display:none!important}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.bar .t{font-family:var(--display);font-weight:500;font-size:15px}
+.dots{display:flex;gap:4px}.dots i{width:9px;height:9px;border-radius:50%}
+.screen{flex:1;padding:22px 20px 28px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);font-weight:500;margin:0;line-height:1.3;text-wrap:balance}
+h1{font-size:26px}h2{font-size:21px}
+.muted{color:var(--ink-2);margin:0}
+.hero{display:flex;align-items:flex-end;gap:10px}
+.hero img{width:120px;height:auto;flex:none;filter:drop-shadow(0 6px 10px rgba(30,34,48,.12))}
+label{font-size:13px;font-weight:500;display:block;margin-bottom:6px}
+input{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink)}
+.primary{border:0;border-radius:14px;padding:14px 18px;background:var(--ink);color:#fff;font-family:var(--display);font-size:17px;font-weight:500}
+.primary:disabled{opacity:.35;cursor:default}
+.ghost{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 16px}
+.err{background:#FDECEC;color:#A2282B;border-radius:10px;padding:10px 12px;font-size:13.5px;margin:0}
+.spacer{flex:1}
+.center{display:grid;place-items:center;text-align:center;gap:14px}
+.spinner{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--ink);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.who-card{border:1.5px solid var(--line);border-radius:18px;padding:18px}
+.who-card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14.5px}
+.who-card dt{color:var(--ink-2)}.who-card dd{margin:0;font-weight:500}
+.how{display:grid;gap:10px;margin:0;padding:0;list-style:none;font-size:14px}
+.how li{display:flex;gap:10px;align-items:flex-start}
+.how li i{flex:none;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-size:12px;display:grid;place-items:center;margin-top:1px}
+.prog{height:6px;background:var(--soft);border-radius:99px;overflow:hidden}
+.prog div{height:100%;background:var(--ink);border-radius:99px;transition:width .3s}
+.qn{font-size:12.5px;color:var(--ink-2);letter-spacing:.04em}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:13px 14px;display:flex;gap:12px;align-items:center;transition:transform .12s,border-color .12s,background .12s}
+.opt.pick{border-color:var(--ink);background:var(--soft);transform:scale(.98)}
+.opt span.k{flex:none;width:28px;height:28px;border-radius:9px;background:var(--soft);display:grid;place-items:center;font-family:var(--display);font-size:14px}
+.nav{display:flex;gap:10px}.nav .primary{flex:1}
+.sports{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sp{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:14px 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:15px}
+.sp::after{content:"";width:20px;height:20px;border-radius:6px;border:1.5px solid #BFC3CF;flex:none}
+.sp[aria-pressed="true"]{border-color:var(--ink);background:var(--soft)}
+.sp[aria-pressed="true"]::after{background:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 4px var(--soft)}
+.sp.wide{grid-column:1/-1}
+.sortwrap{display:flex;flex-direction:column;gap:12px}
+.bubble{position:relative;background:var(--soft);border:1.5px solid var(--line);border-radius:18px;padding:12px 16px 14px;min-height:84px;font-family:var(--display);font-size:17px;line-height:1.45}
+.bubble small{display:block;font-family:var(--body);font-size:11.5px;color:var(--ink-2);letter-spacing:.04em;margin-bottom:2px}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-11px;width:18px;height:18px;background:var(--soft);border-right:1.5px solid var(--line);border-bottom:1.5px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+.bubble.final{font-size:22px;background:var(--surface);border-color:var(--ink)}
+.bubble.final::after{background:var(--surface);border-color:var(--ink)}
+.arena{position:relative;height:280px;border-radius:22px;background:var(--surface);display:grid;place-items:center;overflow:hidden}
+.aura{position:absolute;inset:-30%;background:radial-gradient(closest-side,var(--aura),transparent 70%);opacity:0;transition:opacity .4s}
+.thinking .aura{opacity:.45}.power .aura{opacity:.85;animation:pulse .5s ease-in-out infinite}.landed .aura{opacity:.7}
+@keyframes pulse{50%{transform:scale(1.12)}}
+.bestie{position:relative;height:255px;width:auto;filter:drop-shadow(0 8px 12px rgba(30,34,48,.15))}
+.thinking .bestie{animation:bob 1.2s ease-in-out infinite}
+.power .bestie{animation:shake .14s linear infinite}
+.landed .bestie{animation:jump .55s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bob{50%{transform:translateY(-5px) rotate(-1.5deg)}}
+@keyframes shake{25%{transform:translate(-3px,1px) rotate(-1.5deg)}75%{transform:translate(3px,-1px) rotate(1.5deg)}}
+@keyframes jump{40%{transform:translateY(-22px) scale(1.05)}}
+.spark{position:absolute;font-family:var(--display);font-size:22px;color:var(--aura);opacity:0;transition:opacity .3s}
+.power .spark{opacity:1;animation:twinkle .6s ease-in-out infinite alternate}
+@keyframes twinkle{to{transform:scale(1.4) rotate(20deg)}}
+.fit{display:grid;gap:6px}.fit .cap{font-size:12px;color:var(--ink-2)}
+.fit .row{display:grid;grid-template-columns:52px 1fr 26px;gap:8px;align-items:center;font-size:13px}
+.fit .trk{height:8px;background:var(--soft);border-radius:99px;overflow:hidden}
+.fit .trk i{display:block;height:100%;border-radius:99px;transition:width .6s}
+.fit .n{text-align:right;color:var(--ink-2)}
+.card{border-radius:22px;padding:18px 18px 20px;display:grid;grid-template-columns:1fr auto;gap:6px;align-items:end}
+.card .big{font-family:var(--display);font-size:40px;font-weight:600;line-height:1.05;margin:2px 0}
+.card .nick{font-family:var(--display);font-size:19px}
+.card .who{font-size:13px;opacity:.8}
+.card img{width:124px;align-self:end;filter:drop-shadow(0 6px 10px rgba(30,34,48,.12))}
+.card .quote{grid-column:1/-1;font-family:var(--display);font-size:16px;margin:8px 0 0;padding-top:12px;border-top:1.5px dashed rgba(30,34,48,.2)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tags span{font-size:12.5px;background:rgba(255,255,255,.75);border-radius:999px;padding:2px 10px}
+.pop{animation:pop .6s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.facts{display:grid;gap:10px}.facts h3{font-size:15px}.facts ul{margin:4px 0 0;padding-left:20px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pair div{background:var(--soft);border-radius:14px;padding:12px}
+.pair small{display:block;color:var(--ink-2);font-size:12px}
+.pair b{font-family:var(--display);font-weight:500;font-size:16px;display:flex;align-items:center;gap:8px}
+.sw{width:14px;height:14px;border-radius:5px;display:inline-block}
+@media (prefers-reduced-motion:reduce){.thinking .bestie,.power .bestie,.landed .bestie,.power .aura,.power .spark,.pop{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar"><div class="dots"><i style="background:var(--pink)"></i><i style="background:var(--blue)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></div><span class="t">เกมหาสีประจำตัว</span></div>
+
+  <section class="screen center" id="s-loading"><div class="spinner"></div><p class="muted" id="loadingText">กำลังเปิดเกม…</p></section>
+
+  <section class="screen center" id="s-msg" hidden><img src="think_B.png" alt="" style="width:150px"><h2 id="msgTitle"></h2><p class="muted" id="msgText"></p><button class="ghost" id="msgBtn" hidden>ลองใหม่</button></section>
+
+  <section class="screen" id="s-login" hidden>
+    <div class="hero"><img src="pose_Y.png" alt="น้อง Besties"><div><h1>คุณเป็นคนสีอะไร?</h1><p class="muted" style="font-size:13.5px" id="openText">เล่นได้คนละ 1 ครั้ง</p></div></div>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:14px" novalidate>
+      <div><label for="empId">รหัสพนักงาน</label><input id="empId" autocomplete="off" autocapitalize="characters" placeholder="รหัสพนักงานของคุณ"></div>
+      <div><label for="pin">เบอร์มือถือ 4 ตัวท้าย</label><input id="pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="เช่น 1234"></div>
+      <p class="err" id="loginErr" hidden></p>
+      <button class="primary" type="submit" id="loginBtn">ถัดไป</button>
+    </form>
+  </section>
+
+  <section class="screen" id="s-confirm" hidden>
+    <h2>ใช่คุณหรือเปล่า?</h2>
+    <div class="who-card"><dl><dt>ชื่อ-นามสกุล</dt><dd id="cName"></dd><dt>ตำแหน่ง</dt><dd id="cPos"></dd><dt>หน่วยงาน</dt><dd id="cDept"></dd><dt>รหัสพนักงาน</dt><dd id="cId"></dd></dl></div>
+    <ul class="how">
+      <li><i>1</i><span>ตอบ 8 สถานการณ์ เลือกข้อที่เป็นตัวคุณที่สุด ไม่มีถูกผิด</span></li>
+      <li><i>2</i><span>เลือกกีฬาที่อยากลงแข่ง</span></li>
+      <li><i>3</i><span>น้อง Besties จะเบ่งพลังหาสีให้ สีที่ตรงกับคำตอบมีโอกาสสูง แต่ทีมที่ใกล้เต็มโอกาสจะลดลง</span></li>
+    </ul>
+    <p class="err" id="confirmErr" hidden></p>
+    <div class="spacer"></div>
+    <div class="nav"><button class="ghost" id="notMe">ไม่ใช่ฉัน</button><button class="primary" id="startBtn">ใช่ เริ่มเกม</button></div>
+  </section>
+
+  <section class="screen" id="s-quiz" hidden>
+    <div class="prog"><div id="progBar" style="width:0"></div></div>
+    <span class="qn" id="qNum"></span>
+    <h2 id="qText"></h2>
+    <div class="opts" id="opts"></div>
+    <div class="spacer"></div>
+    <div class="nav"><button class="ghost" id="backBtn">ย้อนกลับ</button><button class="primary" id="nextBtn" disabled>ถัดไป</button></div>
+  </section>
+
+  <section class="screen" id="s-sport" hidden>
+    <div class="prog"><div style="width:100%"></div></div>
+    <span class="qn">ขั้นสุดท้าย</span>
+    <h2>อยากลงแข่งกีฬาอะไรบ้าง?</h2>
+    <p class="muted" style="font-size:13.5px">เลือกได้หลายอย่าง ข้อนี้ช่วยให้แต่ละสีมีนักกีฬาใกล้เคียงกัน ไม่มีผลกับบุคลิกของคุณ</p>
+    <div class="sports" id="sports"></div>
+    <p class="err" id="sportErr" hidden></p>
+    <div class="spacer"></div>
+    <div class="nav"><button class="ghost" id="sportBack">ย้อนกลับ</button><button class="primary" id="sportNext" disabled>ส่งคำตอบ</button></div>
+  </section>
+
+  <section class="screen" id="s-spin" hidden>
+    <div class="sortwrap" id="sortwrap">
+      <div class="bubble" aria-live="polite"><small>น้อง Besties</small><span id="say"></span></div>
+      <div class="arena"><div class="aura"></div><span class="spark" style="left:16%;top:18%">✦</span><span class="spark" style="right:14%;top:26%">✦</span><span class="spark" style="left:22%;bottom:18%">✦</span><img class="bestie" id="bestie" alt="น้อง Besties กำลังเลือกสี"></div>
+      <div class="fit" id="fitBox" hidden><span class="cap">ความเข้ากันจากคำตอบของคุณ</span><div id="fit"></div></div>
+      <button class="primary" id="spinBtn">ให้น้อง Besties เบ่งพลังหาสี</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-result" hidden>
+    <div class="card pop" id="card"></div>
+    <div class="facts" id="facts"></div>
+    <div class="nav"><button class="primary" id="shareBtn">ส่งการ์ดเข้าแชท</button><button class="ghost" id="closeBtn">ปิด</button></div>
+  </section>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script>
+const CFG=window.GAME_CONFIG;
+const COLORS={
+  P:{th:'ชมพู',v:'--pink',t:'--pink-t',nick:'ตัวประสานใจ',axis:'คิดก่อน · เน้นคน',quote:'ทีมจะไปได้ไกล ถ้าไม่มีใครถูกทิ้งไว้ข้างหลัง',str:['ฟังเก่ง เข้าใจคนอื่น','ไกล่เกลี่ยเรื่องยากได้นุ่มนวล','ดูแลทีมโดยไม่ต้องให้ใครขอ'],mate:'G',tune:'B'},
+  B:{th:'ฟ้า',v:'--blue',t:'--blue-t',nick:'นักวางแผน',axis:'คิดก่อน · เน้นงาน',quote:'คิดให้ครบหนึ่งครั้ง ดีกว่าแก้สิบครั้ง',str:['ละเอียด รอบคอบ','มองภาพรวมและระยะยาว','เปลี่ยนเรื่องยุ่งให้เป็นขั้นตอน'],mate:'Y',tune:'P'},
+  Y:{th:'เหลือง',v:'--yellow',t:'--yellow-t',nick:'ตัวจุดไฟ',axis:'ลุยก่อน · เน้นคน',quote:'ที่ไหนมีฉัน ที่นั่นมีเสียงหัวเราะ',str:['สร้างบรรยากาศให้ทีมสนุก','กล้าเริ่มเรื่องใหม่ก่อนใคร','ชวนคนมาร่วมได้เก่ง'],mate:'B',tune:'G'},
+  G:{th:'เขียว',v:'--green',t:'--green-t',nick:'สายลงมือ',axis:'ลุยก่อน · เน้นงาน',quote:'พูดน้อย ทำเสร็จ',str:['ตัดสินใจไว','ผลักงานให้เสร็จทันเวลา','เป็นคนที่ทีมพึ่งได้'],mate:'P',tune:'Y'}
+};
+const ORDER=['P','B','Y','G'];
+const POOL=[
+ ['งานเลี้ยงบริษัท คุณมักจะ…',{Y:'ขึ้นเวทีร่วมเล่นเกม',P:'คอยดูว่าใครยังไม่ได้กิน',B:'เช็กว่ากำหนดการเป็นไปตามแผนไหม',G:'ช่วยยกของ จัดโต๊ะ'}],
+ ['ได้โปรเจกต์ใหม่ที่ไม่มีใครเคยทำ สิ่งแรกที่คุณทำคือ…',{Y:'ชวนทีมระดมไอเดีย',P:'ถามความเห็นทุกคนก่อน',B:'หาข้อมูลและวางแผน',G:'ลองทำเลย แล้วค่อยปรับ'}],
+ ['เพื่อนร่วมงานทะเลาะกัน คุณจะ…',{Y:'เล่นมุกให้บรรยากาศคลาย',P:'แยกคุยกับทีละคน',B:'หาว่าต้นเหตุคืออะไร',G:'เสนอทางออกให้จบเร็ว'}],
+ ['วันหยุดยาว 4 วัน คุณน่าจะ…',{Y:'ชวนแก๊งไปเที่ยว',P:'กลับไปหาครอบครัว',B:'ไปทริปที่วางแผนไว้แล้ว',G:'เคลียร์เรื่องค้าง ซ่อมของในบ้าน'}],
+ ['ประชุมแล้วทุกคนเงียบ คุณจะ…',{Y:'เปิดประเด็นให้คนคุย',P:'ถามคนที่ยังไม่ได้พูด',B:'สรุปข้อมูลให้ทุกคนเห็นภาพ',G:'เสนอให้ตัดสินใจเลย'}],
+ ['หัวหน้าชมงานของคุณ คุณจะ…',{Y:'ชวนทีมไปฉลอง',P:'ขอบคุณคนที่ช่วย',B:'ทบทวนว่าอะไรที่ทำได้ดี',G:'ตั้งเป้าต่อไปทันที'}],
+ ['บ่ายสามโมง มีงานด่วนต้องเสร็จวันนี้',{Y:'ปลุกใจทีมให้ฮึด',P:'ถามว่าใครต้องการให้ช่วย',B:'แบ่งงานเป็นขั้นตอน',G:'ลงมือส่วนที่ยากที่สุดก่อน'}],
+ ['เพื่อนในทีมมักเรียกคุณว่า…',{Y:'ตัวฮาประจำแผนก',P:'ที่ปรึกษาประจำใจ',B:'คนละเอียดที่สุด',G:'คนที่พึ่งได้เสมอ'}],
+ ['เลือกร้านข้าวเที่ยงกับเพื่อน คุณมัก…',{Y:'เสนอร้านเปิดใหม่ให้ลองกัน',P:'ถามว่าทุกคนอยากกินอะไร',B:'เลือกร้านที่รู้ว่าอร่อยและไม่ต้องรอนาน',G:'เดินนำไปร้านที่ใกล้ที่สุด'}],
+ ['ถ้าได้เป็นพิธีกรงานบริษัท คุณจะ…',{Y:'เล่นมุกตลอดงาน',P:'เดินทักทายทุกโต๊ะ',B:'ซ้อมสคริปต์จนเป๊ะ',G:'คุมเวลาให้จบตามกำหนด'}],
+ ['ได้งานที่ไม่ถนัดมา คุณจะ…',{Y:'มองเป็นเรื่องท้าทายที่สนุก',P:'ขอคำแนะนำจากคนที่เคยทำ',B:'ศึกษาข้อมูลก่อนลงมือ',G:'ลุยไปเรียนรู้ไป'}],
+ ['วันทำงานที่ดีสำหรับคุณคือวันที่…',{Y:'ได้หัวเราะกับเพื่อนร่วมงาน',P:'ได้ช่วยให้ใครสักคนสบายใจ',B:'ทุกอย่างเป็นไปตามแผน',G:'เคลียร์งานได้หมดโต๊ะ'}],
+ ['ทีมแพ้การแข่งขันกีฬาสี คุณจะ…',{Y:'ชวนไปกินฉลองอยู่ดี',P:'ปลอบใจเพื่อนที่ลงแข่ง',B:'วิเคราะห์ว่าปีหน้าต้องปรับอะไร',G:'นัดซ้อมเพิ่มตั้งแต่พรุ่งนี้'}],
+ ['ในไลน์กลุ่มที่ทำงาน คุณมักเป็นคน…',{Y:'ส่งสติกเกอร์ปั่นบรรยากาศ',P:'ตอบทุกคนไม่ให้ใครเงียบเหงา',B:'สรุปเรื่องยาวให้อ่านง่าย',G:'ตอบสั้น ๆ ว่า "รับทราบ ดำเนินการ"'}],
+ ['ได้โบนัสก้อนพิเศษ คุณจะ…',{Y:'จัดทริปเที่ยวกับแก๊ง',P:'เลี้ยงขอบคุณคนรอบตัว',B:'แบ่งออมแบ่งลงทุนตามแผน',G:'ซื้อของจำเป็นที่รอมานาน'}],
+ ['ประโยคที่ตรงกับคุณที่สุด',{Y:'ชีวิตต้องมีสีสัน',P:'ใจเขาใจเรา',B:'วางแผนดี มีชัยไปกว่าครึ่ง',G:'ทำเลย ไม่ต้องรอ'}]
+];
+const PICK_N=8;
+const SPORTS=[['fb','ฟุตบอล'],['run','วิ่ง'],['walk','เดิน'],['pet','เปตอง']];
+const spName=id=>(SPORTS.find(s=>s[0]===id)||[0,id])[1];
+const $=id=>document.getElementById(id);
+const nm=k=>COLORS[k].th;
+const pickOne=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const img=(pose,k)=>`${pose}_${k||'G'}.png`;
+let idToken='',profile=null,cred=null,qset,answers,qi,mySports,result;
+
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.hidden=s.id!==id)}
+function message(title,text,retry){$('msgTitle').textContent=title;$('msgText').textContent=text;$('msgBtn').hidden=!retry;go('s-msg')}
+$('msgBtn').onclick=()=>location.reload();
+
+async function api(action,data){
+  const res=await fetch(CFG.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,idToken},data||{}))});
+  if(!res.ok)throw new Error('http '+res.status);
+  return res.json();
+}
+
+async function boot(){
+  try{
+    await liff.init({liffId:CFG.LIFF_ID});
+    if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}
+    idToken=liff.getIDToken();
+    const me=await api('me');
+    if(!me.ok)return message('เปิดเกมไม่สำเร็จ',me.message||'ลองใหม่อีกครั้ง',true);
+    if(me.openText)$('openText').textContent='เปิดเล่น '+me.openText+' · เล่นได้คนละ 1 ครั้ง';
+    if(me.played){profile=me.profile;result=me.result;return showResult(true)}
+    if(!me.open)return message('ยังไม่เปิดเล่น','เกมหาสีเปิดเล่น '+(me.openText||'ตามประกาศ')+' แล้วกลับมาหาน้อง Besties ใหม่นะ');
+    go('s-login');
+  }catch(e){message('เชื่อมต่อไม่สำเร็จ','ตรวจอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',true)}
+}
+
+// login
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();
+  const empId=$('empId').value.trim().toUpperCase(),pin=$('pin').value.trim(),err=$('loginErr'),btn=$('loginBtn');
+  const fail=m=>{err.textContent=m;err.hidden=false};
+  if(!empId)return fail('กรอกรหัสพนักงาน');
+  if(!/^\d{4}$/.test(pin))return fail('กรอกเบอร์มือถือ 4 ตัวท้ายเป็นตัวเลข เช่น 1234');
+  btn.disabled=true;btn.textContent='กำลังตรวจสอบ…';
+  try{const r=await api('check',{empId,pin});
+    if(!r.ok)return fail(r.message);
+    err.hidden=true;cred={empId,pin};profile=r.profile;
+    $('cName').textContent=profile.name;$('cPos').textContent=profile.pos;$('cDept').textContent=profile.dept;$('cId').textContent=profile.empId;go('s-confirm');
+  }catch(x){fail('เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง')}finally{btn.disabled=false;btn.textContent='ถัดไป'}});
+$('notMe').onclick=()=>{$('loginErr').textContent='ถ้าข้อมูลไม่ใช่คุณ ตรวจรหัสอีกครั้ง หรือติดต่อแอดมินเกม';$('loginErr').hidden=false;go('s-login')};
+$('startBtn').onclick=async()=>{const b=$('startBtn'),err=$('confirmErr');b.disabled=true;b.textContent='กำลังเริ่ม…';
+  try{const r=await api('confirm',cred);
+    if(!r.ok){err.textContent=r.message;err.hidden=false;return}
+    qset=shuffle(POOL).slice(0,PICK_N).map(([q,o])=>[q,o,shuffle(ORDER)]);answers=new Array(PICK_N).fill(null);qi=0;renderQ();go('s-quiz');
+  }catch(x){err.textContent='เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง';err.hidden=false}finally{b.disabled=false;b.textContent='ใช่ เริ่มเกม'}};
+
+// quiz
+function renderQ(){const [q,opts,ord]=qset[qi];
+  $('qNum').textContent=`คำถาม ${qi+1} จาก ${PICK_N}`;$('qText').textContent=q;$('progBar').style.width=(qi/PICK_N*100)+'%';
+  $('opts').innerHTML=ord.map((k,i)=>`<button class="opt${answers[qi]===k?' pick':''}" data-k="${k}"><span class="k">${'กขคง'[i]}</span><span>${opts[k]}</span></button>`).join('');
+  $('nextBtn').disabled=!answers[qi];$('backBtn').style.visibility=qi===0?'hidden':'visible'}
+$('opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;answers[qi]=b.dataset.k;
+  document.querySelectorAll('.opt').forEach(o=>o.classList.toggle('pick',o===b));$('nextBtn').disabled=false;
+  setTimeout(()=>{if(qi<PICK_N-1&&answers[qi]===b.dataset.k){qi++;renderQ()}},380)});
+$('backBtn').onclick=()=>{if(qi>0){qi--;renderQ()}};
+$('nextBtn').onclick=()=>{if(!answers[qi])return;if(qi<PICK_N-1){qi++;renderQ()}else{mySports=[];renderSports();go('s-sport')}};
+function renderSports(){
+  $('sports').innerHTML=SPORTS.map(([id,n])=>`<button class="sp" data-s="${id}" aria-pressed="${mySports.includes(id)}">${n}</button>`).join('')+`<button class="sp wide" data-s="none" aria-pressed="${mySports.includes('none')}">ไม่ลงแข่ง ขอเป็นกองเชียร์</button>`;
+  $('sportNext').disabled=!mySports.length}
+$('sports').addEventListener('click',e=>{const b=e.target.closest('.sp');if(!b)return;const s=b.dataset.s;
+  if(s==='none')mySports=mySports.includes('none')?[]:['none'];
+  else{mySports=mySports.filter(x=>x!=='none');mySports=mySports.includes(s)?mySports.filter(x=>x!==s):[...mySports,s]}
+  renderSports()});
+$('sportBack').onclick=()=>{qi=PICK_N-1;renderQ();go('s-quiz')};
+$('sportNext').onclick=async()=>{if(!mySports.length)return;const b=$('sportNext'),err=$('sportErr');b.disabled=true;b.textContent='กำลังส่ง…';
+  try{const r=await api('play',{answers,sports:mySports});
+    if(!r.ok){err.textContent=r.message;err.hidden=false;return}
+    result=r.result;prepSpin();go('s-spin');
+  }catch(x){err.textContent='ส่งคำตอบไม่สำเร็จ ลองกดอีกครั้ง';err.hidden=false}finally{b.disabled=false;b.textContent='ส่งคำตอบ'}};
+
+// sorting show
+const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait=ms=>new Promise(r=>setTimeout(r,reduce()?Math.min(ms,250):ms));
+let flick=null;
+function setLook(pose,k){$('bestie').src=img(pose,k);document.documentElement.style.setProperty('--aura',k?`var(${COLORS[k].v})`:'#C7CBD6')}
+function cycle(pose,keys,ms){clearInterval(flick);let last;flick=setInterval(()=>{let k=pickOne(keys);if(k===last&&keys.length>1)k=pickOne(keys.filter(x=>x!==last));last=k;setLook(pose,k)},ms)}
+function stopCycle(){clearInterval(flick);flick=null}
+async function say(text,final){$('sortwrap').querySelector('.bubble').classList.toggle('final',!!final);const el=$('say');
+  if(reduce()){el.textContent=text;await wait(900);return}
+  const seg=window.Intl&&Intl.Segmenter?[...new Intl.Segmenter('th',{segmentation:'grapheme'}).segment(text)].map(s=>s.segment):[...text];
+  el.textContent='';for(const s of seg){el.textContent+=s;await new Promise(r=>setTimeout(r,26))}
+  await wait(final?400:950)}
+function renderFit(r){
+  $('fit').innerHTML=r.rank.map(k=>`<div class="row"><span>${nm(k)}</span><span class="trk"><i style="width:0;background:var(${COLORS[k].v})" data-w="${r.score[k]/PICK_N*100}"></i></span><span class="n">${r.score[k]}</span></div>`).join('');
+  $('fitBox').hidden=false;requestAnimationFrame(()=>document.querySelectorAll('#fit i').forEach(i=>i.style.width=i.dataset.w+'%'))}
+function script(r){const [a,b]=r.rank,s=r.score,first=(profile.name||'').split(' ')[1]||'',p=r.k,lines=[];
+  lines.push(pickOne([`อืมมม... ${first} สินะ ขอดูคำตอบหน่อย`,`มาแล้ว ${first}! ไหนดูซิว่าเป็นคนแบบไหน`,`โอ้โห ${first}! รอตั้งนาน`]));
+  if(s[a]>=5)lines.push(pickOne([`ชัดเลย ความ${COLORS[a].nick}ล้นออกมาจากคำตอบ`,`ตัวนี้${COLORS[a].nick}เต็มตัว แทบไม่ต้องคิด`]));
+  else lines.push(pickOne([`แปลกจัง... มีทั้งความ${COLORS[a].nick}และความ${COLORS[b].nick}ปนกันเลย`,`คนนี้เหมาะกับหลายสีนะเนี่ย ${nm(a)}ก็ได้ ${nm(b)}ก็ดี...`,`ยากแฮะ ใจหนึ่งว่า${nm(a)} อีกใจว่า${nm(b)}`]));
+  if((r.full||[]).includes(a))lines.push(`ใจจริงอยากส่งไป${nm(a)} แต่บ้าน${nm(a)}รุ่นนี้แน่นเอี้ยดแล้ว!`);
+  if((r.needy||[]).length)lines.push(pickOne([`ว่าแต่... ทีม${nm(p)}ยังขาดนัก${spName(r.needy[0])}อยู่พอดีเลยนะ`,`เอ๊ะ เล่น${spName(r.needy[0])}ด้วยเหรอ ทีม${nm(p)}กำลังหาคนอยู่เลย!`]));
+  lines.push(pickOne(['โอเค ขอเบ่งพลังหาสีหน่อย... ฮึ่มมมม!','ทุกคนถอยไป! ขอรวมพลังแป๊บ...','ฮึบ! พลังสีจงมา!']));
+  let final;
+  if(p===a&&s[a]>=5)final=`${nm(p)}!! ไม่ต้องเถียง`;
+  else if(p===a)final=pickOne([`ตัดสินแล้ว... ${nm(p)}!!`,`เอาล่ะ ${nm(p)}! เหมาะที่สุดแล้ว`]);
+  else if(p===b)final=pickOne([`งั้นยัดเข้า${nm(p)}ละกัน! ${nm(p)}!!`,`ไม่เอาละ ลังเลนานแล้ว ${nm(p)}!!`]);
+  else final=pickOne([`ไม่ใช่สีที่คิดไว้ใช่ไหมล่ะ แต่${nm(p)}กำลังต้องการคนแบบคุณ! ${nm(p)}!!`,`พลิกล็อกนิดนึง... ${nm(p)}!! เชื่อ Besties เถอะ`]);
+  return {lines,final}}
+function prepSpin(){stopCycle();setLook('think',null);$('bestie').src=img('think','G');$('sortwrap').className='sortwrap';$('sortwrap').querySelector('.bubble').classList.remove('final');
+  $('say').textContent='ตอบครบแล้ว! ส่งคำตอบมาให้ Besties ดูหน่อย เดี๋ยวจะหาสีที่ใช่ให้';$('fitBox').hidden=true;$('spinBtn').hidden=false}
+$('spinBtn').onclick=async()=>{$('spinBtn').hidden=true;const wrap=$('sortwrap'),r=result,{lines,final}=script(r);
+  wrap.className='sortwrap thinking';await say(lines[0]);renderFit(r);
+  const keys=r.rank.filter(k=>r.score[k]>0);cycle('think',keys.length>1?keys:ORDER,520);
+  for(const l of lines.slice(1,-1))await say(l);
+  wrap.className='sortwrap power';cycle('cheer',ORDER,110);await say(lines.at(-1));
+  stopCycle();
+  if(!reduce()){let d=120;for(let i=0;i<7;i++){setLook('cheer',i%2?r.k:pickOne(ORDER.filter(k=>k!==r.k)));await new Promise(x=>setTimeout(x,d));d+=60}}
+  setLook('cheer',r.k);wrap.className='sortwrap landed';await say(final,true);await wait(1500);
+  showResult(false)};
+
+function showResult(again){const r=result,c=COLORS[r.k];const card=$('card');
+  card.className='card';void card.offsetWidth;card.className='card pop';card.style.background=`var(${c.t})`;
+  card.innerHTML=`<div><div class="who">${esc(profile?profile.name:'')}${profile?' · '+esc(profile.pos):''}</div><div class="big" style="color:var(${c.v})">ทีม${c.th}</div><div class="nick">${c.nick}</div><div class="who">${c.axis}</div>
+    <div class="tags">${(r.sports||[]).map(s=>`<span>${s==='none'?'กองเชียร์':'นัก'+spName(s)}</span>`).join('')}</div></div>
+    <img src="${img('pose',r.k)}" alt="น้อง Besties หมวกสี${c.th}"><p class="quote">“${c.quote}”</p>`;
+  $('facts').innerHTML=`${again?'<p class="err" style="background:var(--soft);color:var(--ink)">คุณเล่นไปแล้ว นี่คือทีมของคุณ</p>':''}
+    <div><h3>จุดแข็งของคุณ</h3><ul>${c.str.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+    <div class="pair"><div><small>สีคู่หู ทำงานด้วยกันลื่น</small><b><span class="sw" style="background:var(${COLORS[c.mate].v})"></span>${nm(c.mate)}</b></div>
+    <div><small>สีที่ต้องปรับจูนกัน</small><b><span class="sw" style="background:var(${COLORS[c.tune].v})"></span>${nm(c.tune)}</b></div></div>`;
+  go('s-result')}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+$('shareBtn').onclick=async()=>{try{if(liff.isInClient()){await liff.sendMessages([{type:'text',text:'ทีมของฉัน'}]);liff.closeWindow()}}catch(e){liff.closeWindow()}};
+$('closeBtn').onclick=()=>{try{liff.closeWindow()}catch(e){}};
+['think','cheer','pose'].forEach(p=>ORDER.forEach(k=>{const i=new Image();i.src=img(p,k)}));
+boot();
+</script>
+</body>
+</html>
