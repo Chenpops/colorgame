@@ -115,10 +115,9 @@ input{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px soli
   <section class="screen center" id="s-msg" hidden><img src="think_B.webp" alt="" style="width:150px"><h2 id="msgTitle"></h2><p class="muted" id="msgText"></p><button class="ghost" id="msgBtn" hidden>ลองใหม่</button></section>
 
   <section class="screen" id="s-login" hidden>
-    <div class="hero"><img src="pose_Y.webp" alt="น้อง Besties"><div><h1>คุณเป็นคนสีอะไร?</h1><p class="muted" style="font-size:13.5px" id="openText">เล่นได้คนละ 1 ครั้ง</p></div></div>
+    <div class="hero"><img src="pose_Y.webp" alt="น้อง Besties"><div><h1>คุณเป็นคนสีอะไร?</h1><p class="muted" style="font-size:13.5px" id="openText">1 รหัสพนักงานเล่นได้ 1 ครั้ง</p></div></div>
     <form id="loginForm" style="display:flex;flex-direction:column;gap:14px" novalidate>
       <div><label for="empId">รหัสพนักงาน</label><input id="empId" autocomplete="off" autocapitalize="characters" placeholder="รหัสพนักงานของคุณ"></div>
-      <div><label for="pin">เบอร์มือถือ 4 ตัวท้าย</label><input id="pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="เช่น 1234"></div>
       <p class="err" id="loginErr" hidden></p>
       <button class="primary" type="submit" id="loginBtn">ถัดไป</button>
     </form>
@@ -126,9 +125,10 @@ input{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px soli
 
   <section class="screen" id="s-confirm" hidden>
     <h2>ใช่คุณหรือเปล่า?</h2>
+    <p class="muted" style="font-size:13.5px;margin-top:-8px">กด "ใช่ เริ่มเกม" แล้วรหัสนี้จะถูกใช้ทันที เล่นได้ครั้งเดียว ตรวจชื่อให้ถูกก่อนนะ</p>
     <div class="who-card"><dl><dt>ชื่อ-นามสกุล</dt><dd id="cName"></dd><dt>ตำแหน่ง</dt><dd id="cPos"></dd><dt>หน่วยงาน</dt><dd id="cDept"></dd><dt>รหัสพนักงาน</dt><dd id="cId"></dd></dl></div>
     <ul class="how">
-      <li><i>1</i><span>ตอบ 8 สถานการณ์ เลือกข้อที่เป็นตัวคุณที่สุด ไม่มีถูกผิด</span></li>
+      <li><i>1</i><span>ตอบ 5 สถานการณ์ เลือกข้อที่เป็นตัวคุณที่สุด ไม่มีถูกผิด</span></li>
       <li><i>2</i><span>เลือกกีฬาที่อยากลงแข่ง</span></li>
       <li><i>3</i><span>น้อง Besties จะเบ่งพลังหาสีให้ สีที่ตรงกับคำตอบมีโอกาสสูง แต่ทีมที่ใกล้เต็มโอกาสจะลดลง</span></li>
     </ul>
@@ -202,7 +202,7 @@ const POOL=[
  ['ได้โบนัสก้อนพิเศษ คุณจะ…',{Y:'จัดทริปเที่ยวกับแก๊ง',P:'เลี้ยงขอบคุณคนรอบตัว',B:'แบ่งออมแบ่งลงทุนตามแผน',G:'ซื้อของจำเป็นที่รอมานาน'}],
  ['ประโยคที่ตรงกับคุณที่สุด',{Y:'ชีวิตต้องมีสีสัน',P:'ใจเขาใจเรา',B:'วางแผนดี มีชัยไปกว่าครึ่ง',G:'ทำเลย ไม่ต้องรอ'}]
 ];
-const PICK_N=8;
+const PICK_N=5;
 const SPORTS=[['fb','ฟุตบอล'],['run','วิ่ง'],['walk','เดิน'],['pet','เปตอง']];
 const spName=id=>(SPORTS.find(s=>s[0]===id)||[0,id])[1];
 const $=id=>document.getElementById(id);
@@ -230,7 +230,7 @@ async function boot(){
     go('s-login');
     mePromise=api('me').then(me=>{
       if(!me.ok){message('เปิดเกมไม่สำเร็จ',me.message||'ลองใหม่อีกครั้ง',true);return me}
-      if(me.openText)$('openText').textContent='เปิดเล่น '+me.openText+' · เล่นได้คนละ 1 ครั้ง';
+      if(me.openText)$('openText').textContent='เปิดเล่น '+me.openText+' · 1 รหัสพนักงานเล่นได้ 1 ครั้ง';
       if(me.played){profile=me.profile;result=me.result;showResult(true)}
       else if(!me.open)message('ยังไม่เปิดเล่น','เกมหาสีเปิดเล่น '+(me.openText||'ตามประกาศ')+' แล้วกลับมาหาน้อง Besties ใหม่นะ');
       return me}).catch(()=>({ok:true}));
@@ -239,18 +239,17 @@ async function boot(){
 
 // login
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();
-  const empId=$('empId').value.trim().toUpperCase(),pin=$('pin').value.trim(),err=$('loginErr'),btn=$('loginBtn');
+  const empId=$('empId').value.trim().toUpperCase(),err=$('loginErr'),btn=$('loginBtn');
   const fail=m=>{err.textContent=m;err.hidden=false};
   if(!empId)return fail('กรอกรหัสพนักงาน');
-  if(!/^\d{4}$/.test(pin))return fail('กรอกเบอร์มือถือ 4 ตัวท้ายเป็นตัวเลข เช่น 1234');
   btn.disabled=true;btn.textContent='กำลังตรวจสอบ…';
   try{const me=await mePromise;if(me&&(me.played||me.open===false||me.ok===false))return;
-    const r=await api('check',{empId,pin});
+    const r=await api('check',{empId});
     if(!r.ok)return fail(r.message);
-    err.hidden=true;cred={empId,pin};profile=r.profile;
+    err.hidden=true;cred={empId};profile=r.profile;
     $('cName').textContent=profile.name;$('cPos').textContent=profile.pos;$('cDept').textContent=profile.dept;$('cId').textContent=profile.empId;go('s-confirm');
   }catch(x){fail('เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง')}finally{btn.disabled=false;btn.textContent='ถัดไป'}});
-$('notMe').onclick=()=>{$('loginErr').textContent='ถ้าข้อมูลไม่ใช่คุณ ตรวจรหัสอีกครั้ง หรือติดต่อแอดมินเกม';$('loginErr').hidden=false;go('s-login')};
+$('notMe').onclick=()=>{$('loginErr').textContent='ถ้าข้อมูลไม่ใช่คุณ ตรวจรหัสพนักงานอีกครั้ง หรือติดต่อแอดมินเกม';$('loginErr').hidden=false;go('s-login')};
 $('startBtn').onclick=()=>{
   confirmPromise=api('confirm',cred).catch(()=>({ok:false,message:'เชื่อมต่อไม่สำเร็จ ลองส่งคำตอบอีกครั้ง'}));
   qset=shuffle(POOL).slice(0,PICK_N).map(([q,o])=>[q,o,shuffle(ORDER)]);answers=new Array(PICK_N).fill(null);qi=0;renderQ();go('s-quiz');
@@ -296,13 +295,13 @@ function renderFit(r){
   $('fitBox').hidden=false;requestAnimationFrame(()=>document.querySelectorAll('#fit i').forEach(i=>i.style.width=i.dataset.w+'%'))}
 function script(r){const [a,b]=r.rank,s=r.score,first=(profile.name||'').split(' ')[1]||'',p=r.k,lines=[];
   lines.push(pickOne([`อืมมม... ${first} สินะ ขอดูคำตอบหน่อย`,`มาแล้ว ${first}! ไหนดูซิว่าเป็นคนแบบไหน`,`โอ้โห ${first}! รอตั้งนาน`]));
-  if(s[a]>=5)lines.push(pickOne([`ชัดเลย ความ${COLORS[a].nick}ล้นออกมาจากคำตอบ`,`ตัวนี้${COLORS[a].nick}เต็มตัว แทบไม่ต้องคิด`]));
+  if(s[a]>=4)lines.push(pickOne([`ชัดเลย ความ${COLORS[a].nick}ล้นออกมาจากคำตอบ`,`ตัวนี้${COLORS[a].nick}เต็มตัว แทบไม่ต้องคิด`]));
   else lines.push(pickOne([`แปลกจัง... มีทั้งความ${COLORS[a].nick}และความ${COLORS[b].nick}ปนกันเลย`,`คนนี้เหมาะกับหลายสีนะเนี่ย ${nm(a)}ก็ได้ ${nm(b)}ก็ดี...`,`ยากแฮะ ใจหนึ่งว่า${nm(a)} อีกใจว่า${nm(b)}`]));
   if((r.full||[]).includes(a))lines.push(`ใจจริงอยากส่งไป${nm(a)} แต่บ้าน${nm(a)}รุ่นนี้แน่นเอี้ยดแล้ว!`);
   if((r.needy||[]).length)lines.push(pickOne([`ว่าแต่... ทีม${nm(p)}ยังขาดนัก${spName(r.needy[0])}อยู่พอดีเลยนะ`,`เอ๊ะ เล่น${spName(r.needy[0])}ด้วยเหรอ ทีม${nm(p)}กำลังหาคนอยู่เลย!`]));
   lines.push(pickOne(['โอเค ขอเบ่งพลังหาสีหน่อย... ฮึ่มมมม!','ทุกคนถอยไป! ขอรวมพลังแป๊บ...','ฮึบ! พลังสีจงมา!']));
   let final;
-  if(p===a&&s[a]>=5)final=`${nm(p)}!! ไม่ต้องเถียง`;
+  if(p===a&&s[a]>=4)final=`${nm(p)}!! ไม่ต้องเถียง`;
   else if(p===a)final=pickOne([`ตัดสินแล้ว... ${nm(p)}!!`,`เอาล่ะ ${nm(p)}! เหมาะที่สุดแล้ว`]);
   else if(p===b)final=pickOne([`งั้นยัดเข้า${nm(p)}ละกัน! ${nm(p)}!!`,`ไม่เอาละ ลังเลนานแล้ว ${nm(p)}!!`]);
   else final=pickOne([`ไม่ใช่สีที่คิดไว้ใช่ไหมล่ะ แต่${nm(p)}กำลังต้องการคนแบบคุณ! ${nm(p)}!!`,`พลิกล็อกนิดนึง... ${nm(p)}!! เชื่อ Besties เถอะ`]);
