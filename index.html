@@ -243,8 +243,7 @@ $('loginForm').addEventListener('submit',async e=>{e.preventDefault();
   const fail=m=>{err.textContent=m;err.hidden=false};
   if(!empId)return fail('กรอกรหัสพนักงาน');
   btn.disabled=true;btn.textContent='กำลังตรวจสอบ…';
-  try{const me=await mePromise;if(me&&(me.played||me.open===false||me.ok===false))return;
-    const r=await api('check',{empId});
+  try{const r=await api('check',{empId});
     if(!r.ok)return fail(r.message);
     err.hidden=true;cred={empId};profile=r.profile;
     $('cName').textContent=profile.name;$('cPos').textContent=profile.pos;$('cDept').textContent=profile.dept;$('cId').textContent=profile.empId;go('s-confirm');
@@ -276,7 +275,7 @@ $('sportBack').onclick=()=>{qi=PICK_N-1;renderQ();go('s-quiz')};
 $('sportNext').onclick=()=>{if(!mySports.length)return;$('sportErr').hidden=true;
   playPromise=(async()=>{let c=await confirmPromise;if(!c||!c.ok){c=await api('confirm',cred).catch(()=>c);if(!c||!c.ok)return c||{ok:false,message:'ยืนยันตัวตนไม่สำเร็จ ลองใหม่อีกครั้ง'}}
     try{return await api('play',{answers,sports:mySports})}catch(x){return {ok:false,message:'ส่งคำตอบไม่สำเร็จ ลองกดอีกครั้ง'}}})();
-  prepSpin();go('s-spin')};
+  prepSpin();go('s-spin');setTimeout(()=>$('spinBtn').click(),250)};
 
 // sorting show
 const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -288,8 +287,8 @@ function stopCycle(){clearInterval(flick);flick=null}
 async function say(text,final){$('sortwrap').querySelector('.bubble').classList.toggle('final',!!final);const el=$('say');
   if(reduce()){el.textContent=text;await wait(900);return}
   const seg=window.Intl&&Intl.Segmenter?[...new Intl.Segmenter('th',{segmentation:'grapheme'}).segment(text)].map(s=>s.segment):[...text];
-  el.textContent='';for(const s of seg){el.textContent+=s;await new Promise(r=>setTimeout(r,26))}
-  await wait(final?400:950)}
+  el.textContent='';for(const s of seg){el.textContent+=s;await new Promise(r=>setTimeout(r,16))}
+  await wait(final?300:650)}
 function renderFit(r){
   $('fit').innerHTML=r.rank.map(k=>`<div class="row"><span>${nm(k)}</span><span class="trk"><i style="width:0;background:var(${COLORS[k].v})" data-w="${r.score[k]/PICK_N*100}"></i></span><span class="n">${r.score[k]}</span></div>`).join('');
   $('fitBox').hidden=false;requestAnimationFrame(()=>document.querySelectorAll('#fit i').forEach(i=>i.style.width=i.dataset.w+'%'))}
@@ -298,7 +297,7 @@ function script(r){const [a,b]=r.rank,s=r.score,first=(profile.name||'').split('
   if(s[a]>=4)lines.push(pickOne([`ชัดเลย ความ${COLORS[a].nick}ล้นออกมาจากคำตอบ`,`ตัวนี้${COLORS[a].nick}เต็มตัว แทบไม่ต้องคิด`]));
   else lines.push(pickOne([`แปลกจัง... มีทั้งความ${COLORS[a].nick}และความ${COLORS[b].nick}ปนกันเลย`,`คนนี้เหมาะกับหลายสีนะเนี่ย ${nm(a)}ก็ได้ ${nm(b)}ก็ดี...`,`ยากแฮะ ใจหนึ่งว่า${nm(a)} อีกใจว่า${nm(b)}`]));
   if((r.full||[]).includes(a))lines.push(`ใจจริงอยากส่งไป${nm(a)} แต่บ้าน${nm(a)}รุ่นนี้แน่นเอี้ยดแล้ว!`);
-  if((r.needy||[]).length)lines.push(pickOne([`ว่าแต่... ทีม${nm(p)}ยังขาดนัก${spName(r.needy[0])}อยู่พอดีเลยนะ`,`เอ๊ะ เล่น${spName(r.needy[0])}ด้วยเหรอ ทีม${nm(p)}กำลังหาคนอยู่เลย!`]));
+  if((r.needy||[]).length&&!(r.full||[]).includes(a))lines.push(pickOne([`ว่าแต่... ทีม${nm(p)}ยังขาดนัก${spName(r.needy[0])}อยู่พอดีเลยนะ`,`เอ๊ะ เล่น${spName(r.needy[0])}ด้วยเหรอ ทีม${nm(p)}กำลังหาคนอยู่เลย!`]));
   lines.push(pickOne(['โอเค ขอเบ่งพลังหาสีหน่อย... ฮึ่มมมม!','ทุกคนถอยไป! ขอรวมพลังแป๊บ...','ฮึบ! พลังสีจงมา!']));
   let final;
   if(p===a&&s[a]>=4)final=`${nm(p)}!! ไม่ต้องเถียง`;
@@ -317,10 +316,10 @@ $('spinBtn').onclick=async()=>{$('spinBtn').hidden=true;const wrap=$('sortwrap')
   result=res.result;const r=result,{lines,final}=script(r);renderFit(r);
   const keys=r.rank.filter(k=>r.score[k]>0);cycle('think',keys.length>1?keys:ORDER,520);
   for(const l of lines.slice(1,-1))await say(l);
-  wrap.className='sortwrap power';cycle('cheer',ORDER,110);await say(lines.at(-1));
+  wrap.className='sortwrap power';cycle('cheer',ORDER,90);await say(lines.at(-1));
   stopCycle();
-  if(!reduce()){let d=120;for(let i=0;i<7;i++){setLook('cheer',i%2?r.k:pickOne(ORDER.filter(k=>k!==r.k)));await new Promise(x=>setTimeout(x,d));d+=60}}
-  setLook('cheer',r.k);wrap.className='sortwrap landed';await say(final,true);await wait(1500);
+  if(!reduce()){let d=90;for(let i=0;i<5;i++){setLook('cheer',i%2?r.k:pickOne(ORDER.filter(k=>k!==r.k)));await new Promise(x=>setTimeout(x,d));d+=50}}
+  setLook('cheer',r.k);wrap.className='sortwrap landed';await say(final,true);await wait(900);
   showResult(false)};
 
 function showResult(again){const r=result,c=COLORS[r.k];const card=$('card');
